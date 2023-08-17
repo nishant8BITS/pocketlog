@@ -13,11 +13,14 @@ type Logger struct {
 }
 
 // New returns a logger
-func New(threshold Level, output io.Writer) *Logger {
-	return &Logger{
-		threshold: threshold,
-		output:    output,
+func New(threshold Level, opts ...Option) *Logger {
+	lgr := &Logger{threshold: threshold, output: os.Stdout}
+
+	for _, configFunc := range opts {
+		configFunc(lgr)
 	}
+
+	return lgr
 }
 
 // Debugf formats and prints the message when log level is debug or higher
@@ -66,4 +69,8 @@ func (l *Logger) Errorf(format string, args ...any) {
 	}
 
 	_, _ = fmt.Printf(format+"\n", args...)
+}
+
+func (l *Logger) logf(format string, args ...any) {
+	_, _ = fmt.Fprintf(l.output, format+"\n", args...)
 }
